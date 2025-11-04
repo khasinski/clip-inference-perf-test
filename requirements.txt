@@ -1,0 +1,14 @@
+# Model conversion and download
+torch>=2.0.0
+transformers>=4.30.0
+multilingual-clip
+onnx>=1.14.0
+onnxruntime>=1.16.0
+
+# Python server
+fastapi
+uvicorn[standard]
+gunicorn
+numpy
+requests
+pydantic
