@@ -1,0 +1,84 @@
+name: tests
+
+on: 
+  push:
+      branches:
+          - main
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - name: PHP8.1
+            os: ubuntu-latest
+            php: '8.1'
+            phpunit: '10.5'
+          - name: PHP8.3
+            os: ubuntu-latest
+            php: '8.3'
+            phpunit: '11.5'
+          - name: PHP8.4
+            os: ubuntu-latest
+            php: '8.4'
+            phpunit: '11.5'
+          - name: Windows
+            os: windows-latest
+            php: '8.4'
+            phpunit: '11.5'
+          - name: macOS
+            os: macos-latest
+            php: '8.4'
+            phpunit: '11.5'
+          - name: macOS-x86_64
+            os: macos-13
+            php: '8.4'
+            phpunit: '11.5'
+
+
+    steps:
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          # PHP Extras
+          coverage: none
+          tools: composer, phpstan
+          #ini-values: "memory_limit=512M"
+          extensions: ffi, mbstring
+        env:
+          fail-fast: true
+
+      - name: Install OpenBLAS
+        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
+        run: |
+          sudo apt install -y libopenblas0 liblapacke
+
+      - name: Checkout codes
+        uses: "actions/checkout@v4"
+
+      - name: Composer
+        run: |
+          composer update
+          composer require --dev phpunit/phpunit=^${{ matrix.phpunit }}
+
+      - name: PHP Static Analysys
+        run: phpstan
+
+      - name: PHPUnit Tests
+        if: ${{ !startsWith(matrix.os, 'windows-') }}
+        run: vendor/bin/phpunit -c tests
+
+      - name: PHPUnit Tests
+        if: ${{ startsWith(matrix.os, 'windows-') }}
+        run: |
+          Invoke-WebRequest -Uri https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.3.27/OpenBLAS-0.3.27-x64.zip -OutFile openblas.zip
+          Expand-Archive -Path openblas.zip
+          $currentDir = (Get-Location).Path
+          $OpenBLAS_DIR = Join-Path -Path $currentDir -ChildPath 'openblas'
+          $env:PATH = "$OpenBLAS_DIR/bin;$env:PATH"
+          dir $OpenBLAS_DIR/bin
+          vendor/bin/phpunit -c tests

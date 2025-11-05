@@ -1,0 +1,12 @@
+/.phpunit.cache
+/.php-cs-fixer.cache
+/.php-cs-fixer.php
+/composer.lock
+/vendor/
+*.swp
+*.swo
+playground/*
+.idea
+.transformers-cache/*
+tests/models/*
+dist
