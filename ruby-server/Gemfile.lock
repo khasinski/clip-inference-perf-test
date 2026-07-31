@@ -84,7 +84,7 @@ GEM
       msgpack
     memory-leak (0.7.0)
     metrics (0.15.0)
-    msgpack (1.8.0)
+    msgpack (1.8.2)
     mustermann (3.0.4)
       ruby2_keywords (~> 0.0.1)
     nio4r (2.7.5)
